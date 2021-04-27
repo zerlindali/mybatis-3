@@ -115,11 +115,15 @@ public class MapperAnnotationBuilder {
   public void parse() {
     String resource = type.toString();
     if (!configuration.isResourceLoaded(resource)) {
+      // 先判断Mapper.xml有没有解析，没有的话，先解析Mapper.xml.(例如定义package方法)
       loadXmlResource();
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
+      // 解析@CacheNamespace
       parseCache();
+      // 解析@CacheNamespaceRef
       parseCacheRef();
+      // 获取接口所有方法
       for (Method method : type.getMethods()) {
         if (!canHaveStatement(method)) {
           continue;
@@ -129,6 +133,7 @@ public class MapperAnnotationBuilder {
           parseResultMap(method);
         }
         try {
+          // 处理方法上的注解
           parseStatement(method);
         } catch (IncompleteElementException e) {
           configuration.addIncompleteMethod(new MethodResolver(this, method));
@@ -355,6 +360,7 @@ public class MapperAnnotationBuilder {
         }
       }
 
+      // 最终得到MappedStatement对象
       assistant.addMappedStatement(
           mappedStatementId,
           sqlSource,

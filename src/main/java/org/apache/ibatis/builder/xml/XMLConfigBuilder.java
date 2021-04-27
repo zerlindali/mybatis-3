@@ -50,6 +50,7 @@ import org.apache.ibatis.type.JdbcType;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ * 解析全局配置文件
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
@@ -79,11 +80,12 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public XMLConfigBuilder(InputStream inputStream, String environment, Properties props) {
+    // 加载解析XML文件
     this(new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
   }
 
   private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
-    super(new Configuration());
+    super(new Configuration()); // 完成Configuration初始化
     ErrorContext.instance().resource("SQL Mapper Configuration");
     this.configuration.setVariables(props);
     this.parsed = false;
@@ -92,10 +94,12 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public Configuration parse() {
+    // 只能被使用一次
     if (parsed) {
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
     parsed = true;
+    // 解析configuration文件
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
   }
@@ -105,17 +109,24 @@ public class XMLConfigBuilder extends BaseBuilder {
       // issue #117 read properties first
       propertiesElement(root.evalNode("properties"));
       Properties settings = settingsAsProperties(root.evalNode("settings"));
+      // 远程虚拟文件
       loadCustomVfs(settings);
+      // 日志解析
       loadCustomLogImpl(settings);
+      // 类型别名
       typeAliasesElement(root.evalNode("typeAliases"));
+      // 插件
       pluginElement(root.evalNode("plugins"));
       objectFactoryElement(root.evalNode("objectFactory"));
+      // 包装器
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+      //
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+      // 类型处理器
       typeHandlerElement(root.evalNode("typeHandlers"));
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
@@ -131,7 +142,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     // Check that all settings are known to the configuration class
     MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
     for (Object key : props.keySet()) {
-      if (!metaConfig.hasSetter(String.valueOf(key))) {
+      if (!metaConfig.hasSetter(String.valueOf(key))) { // 检查非法设置
         throw new BuilderException("The setting " + key + " is not known.  Make sure you spelled it correctly (case sensitive).");
       }
     }

@@ -45,7 +45,14 @@ public class MapperProxyFactory<T> {
 
   @SuppressWarnings("unchecked")
   protected T newInstance(MapperProxy<T> mapperProxy) {
-    return (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[] { mapperInterface }, mapperProxy);
+    return (T) Proxy.newProxyInstance(
+      // 类加载器
+      mapperInterface.getClassLoader(),
+      // 要代理的接口
+      new Class[] { mapperInterface },
+      // 实现了InvocationHandler的触发管理类，执行接口的任意方法，都进入这个类的invoke方法
+      mapperProxy
+    );
   }
 
   public T newInstance(SqlSession sqlSession) {

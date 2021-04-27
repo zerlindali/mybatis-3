@@ -80,6 +80,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
+
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       } else {
@@ -142,6 +143,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable {
+      // 开始sql语句真正的执行操作
       return mapperMethod.execute(sqlSession, args);
     }
   }

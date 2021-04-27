@@ -181,6 +181,7 @@ public class Configuration {
   }
 
   public Configuration() {
+    // 为类型注册别名
     typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
     typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 
@@ -673,11 +674,14 @@ public class Configuration {
     } else if (ExecutorType.REUSE == executorType) {
       executor = new ReuseExecutor(this, transaction);
     } else {
+      // 默认SimpleExecutor
       executor = new SimpleExecutor(this, transaction);
     }
+    // 二级缓存开关，setting中的cacheEnabled默认是true
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
+    // 植入插件的逻辑
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
   }
